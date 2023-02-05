@@ -4,10 +4,11 @@ import telebot
 from telebot import types
 import uuid
 
+# вставляем свой токен
 bot = telebot.TeleBot("6008564363:AAG18WyaKWEI_tCl1J6ee-vXBSHS3XECLhA")
 storage = {}
 
-
+# инициализируем классы идент игры, кто сейчас ходит, чат, сообщение, поле
 class Game:
     def __init__(self):
         self.uuid = str(uuid.uuid4())
@@ -21,9 +22,9 @@ class Game:
         ]
 
 
-board = list(range(1, 10))
 
 
+# команда для начала игры
 @bot.message_handler(commands=["start"])
 def start(message):
     game = Game()
@@ -34,13 +35,13 @@ def start(message):
     game.chat_id = message.chat.id
     step(game)
 
-
+# шаг игры (изменения сообщения поочередное)
 def step(game):
     kk = gen_markup(game)
     # bot.send_message(message.chat.id, f"Ходят: {game.current}", reply_markup=kk)
     bot.edit_message_text(f"Ходят: {game.current}", game.chat_id, game.message_id, reply_markup=kk)
 
-
+#генерация клавиатуры в зависимости от поля
 def gen_markup(game):
     keyboard = types.InlineKeyboardMarkup()
     for i, row in enumerate(game.map):
@@ -54,7 +55,7 @@ def gen_markup(game):
 
     return keyboard
 
-
+# функция которая реализовывает ходы
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     action, i, j, uuid, current = call.data.split(":")
@@ -77,7 +78,7 @@ def stop_game(game,win):
     bot.edit_message_text(f"Победили: {win}", game.chat_id, game.message_id, reply_markup=None)
 
 
-
+#функция проверки комбинаций
 def check_map_for_win(game_map):
     combinations = [
         [[0, 0], [0, 1], [0, 2]],
